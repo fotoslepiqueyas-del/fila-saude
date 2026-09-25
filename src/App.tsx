@@ -563,3 +563,38 @@ export default function App() {
     </div>
   )
 }
+
+// ── App shell ─────────────────────────────────────────────────────────────────
+export default function App() {
+  const [screen, setScreen] = useState<Screen>("home")
+
+  return (
+    <div
+      className="w-screen h-screen flex items-center justify-center bg-[#CBD5E1] p-0 sm:p-4 overflow-hidden"
+      style={{ fontFamily: "'Outfit', sans-serif" }}
+    >
+      {/* Moldura centralizada do telemóvel com as proporções exatas do protótipo */}
+      <div
+        className="relative flex flex-col bg-white overflow-hidden shadow-2xl"
+        style={{ width: "100%", maxWidth: 375, height: "100%", maxHeight: 720, borderRadius: window.innerWidth < 640 ? 0 : 40 }}
+      >
+        {/* Ilha / Notch superior do telemóvel */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 w-28 h-7 bg-[#1A6FBF] rounded-b-2xl flex items-center justify-center gap-1.5 shadow-sm">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#0F4A8A]/60" />
+          <div className="w-10 h-1 bg-[#0F4A8A]/40 rounded-full" />
+        </div>
+
+        <div className="flex-1 flex flex-col overflow-hidden mt-7">
+          {screen === "home" && (
+            <HomeScreen onTriageOpen={() => setScreen("triage")} />
+          )}
+          {screen === "triage" && (
+            <TriageScreen onBack={() => setScreen("home")} />
+          )}
+        </div>
+
+        <BottomNav active={screen} onChange={setScreen} />
+      </div>
+    </div>
+  )
+}
