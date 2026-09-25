@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
-@import 'tailwindcss';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 html,
 body,
@@ -15,7 +18,8 @@ body,
 ::-webkit-scrollbar { display: none; }
 * { scrollbar-width: none; }
 
-@theme inline {
+/* Mapeamento das suas cores customizadas para compatibilidade com o Tailwind v3 */
+:root {
   --color-blue-inst: #1A6FBF;
   --color-blue-light: #EBF4FF;
   --color-blue-dark: #0F4A8A;
