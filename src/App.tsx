@@ -48,7 +48,7 @@ interface TriageStep {
   id: number
   question: string
   hint: string
-  options: { label: string value: "yes" | "no" }[]
+  options: { label: string; value: "yes" | "no" }[]
 }
 
 const triageSteps: TriageStep[] = [
@@ -93,8 +93,6 @@ const triageSteps: TriageStep[] = [
 type Recommendation = "ubs_urgent" | "ubs"
 
 function getRecommendation(answers: ("yes" | "no")[]): Recommendation {
-  // answers[0] = Resposta da Pergunta 1
-  // answers[2] = Resposta da Pergunta 3
   const urgentFlags = [answers[0] === "yes", answers[2] === "yes"]
   return urgentFlags.some(Boolean) ? "ubs_urgent" : "ubs"
 }
@@ -469,7 +467,6 @@ function TriageScreen({ onBack }: { onBack: () => void }) {
   const handleAnswer = (value: "yes" | "no") => {
     const newAnswers = [...answers, value]
     setAnswers(newAnswers)
-    // Avança para a próxima pergunta até terminar o fluxo
     setStep(step + 1)
   }
 
