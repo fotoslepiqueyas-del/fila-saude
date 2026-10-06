@@ -45,7 +45,6 @@ const statusConfig = {
   },
 }
 
-// Hospitais oficiais corrigidos conforme pedido
 const officialHospitals: Hospital[] = [
   {
     id: 1,
@@ -446,43 +445,231 @@ function ProfileScreen() {
   )
 }
 
-// ── TriageScreen ────────────────────────────────────────────────────────────
-const triageSteps = [
-  { id: 1, question: "Você está sentindo dor no peito ou dificuldade para respirar?", hint: "Pressão, aperto ou falta de ar súbita" },
-  { id: 2, question: "Seus sintomas começaram há menos de 24 horas?", hint: "Ou pioraram rapidamente" },
-  { id: 3, question: "Você tem febre acima de 38,5 °C?", hint: "Aferida com termômetro" },
-  { id: 4, question: "Você tem alguma condição crônica de saúde?", hint: "Diabetes, hipertensão, cardiopatia, etc." },
+// ── TriageScreen com 16 Perguntas e Múltiplas Opções por Gêneros ─────────────
+interface TriageQuestion {
+  id: number
+  genre: string
+  question: string
+  hint: string
+  options: { label: string; score: number }[]
+}
+
+const triageQuestions: TriageQuestion[] = [
+  // Categoria 1: Urgências Críticas e Cardiorrespiratórias
+  {
+    id: 1,
+    genre: "Urgências Cardiorrespiratórias",
+    question: "Você está sentindo dor ou aperto intenso no peito?",
+    hint: "Sensação de peso ou pressão que pode irradiar para o braço ou mandíbula",
+    options: [
+      { label: "Não", score: 0 },
+      { label: "Leve / Esporádica", score: 2 },
+      { label: "Intensa / Contínua", score: 5 },
+    ],
+  },
+  {
+    id: 2,
+    genre: "Urgências Cardiorrespiratórias",
+    question: "Como está a sua respiração neste momento?",
+    hint: "Avalie se há falta de ar ao repouso",
+    options: [
+      { label: "Normal", score: 0 },
+      { label: "Cansaço leve ao caminhar", score: 2 },
+      { label: "Falta de ar grave / Em repouso", score: 5 },
+    ],
+  },
+  {
+    id: 3,
+    genre: "Urgências Cardiorrespiratórias",
+    question: "Apresenta tontura severa, confusão mental ou desmaio recente?",
+    hint: "Sensação de que vai desmaiar ou perda breve de consciência",
+    options: [
+      { label: "Não", score: 0 },
+      { label: "Leve tontura passageira", score: 1 },
+      { label: "Sim, confusão ou desmaio", score: 4 },
+    ],
+  },
+  {
+    id: 4,
+    genre: "Urgências Cardiorrespiratórias",
+    question: "Houve episódios de lábios ou dedos roxeados (cianose)?",
+    hint: "Sinal de baixa oxigenação no sangue",
+    options: [
+      { label: "Não", score: 0 },
+      { label: "Notou leve palidez", score: 1 },
+      { label: "Sim, aspecto azulado/roxeado", score: 5 },
+    ],
+  },
+
+  // Categoria 2: Sintomas Gerais e Infecções
+  {
+    id: 5,
+    genre: "Sintomas Gerais",
+    question: "Você está com febre aferida?",
+    hint: "Verifique a temperatura atual com termômetro",
+    options: [
+      { label: "Sem febre (Abaixo de 37,5°C)", score: 0 },
+      { label: "Febrícula (37,5°C a 38,4°C)", score: 1 },
+      { label: "Febre alta (Acima de 38,5°C)", score: 3 },
+    ],
+  },
+  {
+    id: 6,
+    genre: "Sintomas Gerais",
+    question: "Há quanto tempo os sintomas iniciais começaram?",
+    hint: "Velocidade de evolução do quadro clínico",
+    options: [
+      { label: "Há mais de 3 dias", score: 0 },
+      { label: "Entre 24 e 72 horas", score: 1 },
+      { label: "Há menos de 24 horas (Início súbito)", score: 3 },
+    ],
+  },
+  {
+    id: 7,
+    genre: "Sintomas Gerais",
+    question: "Apresenta quadro de náuseas, vômitos frequentes ou diarreia?",
+    hint: "Dificuldade para reter líquidos ou alimentos",
+    options: [
+      { label: "Não", score: 0 },
+      { label: "Ocasional (1 a 2 vezes)", score: 1 },
+      { label: "Constante / Risco de desidratação", score: 3 },
+    ],
+  },
+  {
+    id: 8,
+    genre: "Sintomas Gerais",
+    question: "Sente dor de cabeça forte ou rigidez na nuca?",
+    hint: "Dor de cabeça incapacitante",
+    options: [
+      { label: "Não", score: 0 },
+      { label: "Dor moderada", score: 1 },
+      { label: "Dor insuportável / Rigidez na nuca", score: 4 },
+    ],
+  },
+
+  // Categoria 3: Condições Crônicas e Histórico
+  {
+    id: 9,
+    genre: "Histórico de Saúde",
+    question: "Você possui alguma comorbidade crônica?",
+    hint: "Diabetes, hipertensão arterial, asma ou problemas cardíacos",
+    options: [
+      { label: "Nenhuma", score: 0 },
+      { label: "Sim, controlada com remédios", score: 1 },
+      { label: "Sim, instável ou sem controle", score: 3 },
+    ],
+  },
+  {
+    id: 10,
+    genre: "Histórico de Saúde",
+    question: "Faz uso contínuo de medicamentos de tarja preta ou anticoagulantes?",
+    hint: "Remédios que alteram a coagulação ou controle neurológico",
+    options: [
+      { label: "Não", score: 0 },
+      { label: "Sim, uso eventual", score: 1 },
+      { label: "Sim, uso diário rigoroso", score: 2 },
+    ],
+  },
+  {
+    id: 11,
+    genre: "Histórico de Saúde",
+    question: "Você está gestante ou suspeita de gravidez?",
+    hint: "Condição especial de atendimento prioritário",
+    options: [
+      { label: "Não / Não se aplica", score: 0 },
+      { label: "Sim (Primeiro/Segundo trimestre)", score: 1 },
+      { label: "Sim (Com sintomas de risco gestacional)", score: 3 },
+    ],
+  },
+  {
+    id: 12,
+    genre: "Histórico de Saúde",
+    question: "Possui histórico recente de cirurgias ou internações (últimos 30 dias)?",
+    hint: "Recuperação cirúrgica em andamento",
+    options: [
+      { label: "Não", score: 0 },
+      { label: "Sim, alta recente sem queixas", score: 1 },
+      { label: "Sim, com complicações na ferida/recuperação", score: 3 },
+    ],
+  },
+
+  // Categoria 4: Traumas, Dores Locais e Ortopedia
+  {
+    id: 13,
+    genre: "Traumas e Ortopedia",
+    question: "Sofreu alguma queda, acidente de trânsito ou trauma físico recente?",
+    hint: "Impacto forte em ossos ou articulações",
+    options: [
+      { label: "Não", score: 0 },
+      { label: "Leve batida sem deformidade", score: 1 },
+      { label: "Trauma forte / Impossibilidade de mexer o membro", score: 4 },
+    ],
+  },
+  {
+    id: 14,
+    genre: "Traumas e Ortopedia",
+    question: "Apresenta sangramento ativo ou corte profundo que não estanca?",
+    hint: "Necessidade de pontos ou curativo cirúrgico",
+    options: [
+      { label: "Não", score: 0 },
+      { label: "Sangramento pequeno que já parou", score: 1 },
+      { label: "Sangramento constante / Aberto", score: 3 },
+    ],
+  },
+  {
+    id: 15,
+    genre: "Traumas e Ortopedia",
+    question: "Sente dormência, formigamento ou perda de força nos membros?",
+    hint: "Sinais de comprometimento neurológico periférico",
+    options: [
+      { label: "Não", score: 0 },
+      { label: "Leve formigamento passageiro", score: 1 },
+      { label: "Perda clara de força ou dormência total", score: 3 },
+    ],
+  },
+  {
+    id: 16,
+    genre: "Traumas e Ortopedia",
+    question: "Apresenta inchaço repentino (edema) em pernas, braços ou face?",
+    hint: "Inchaço localizado ou generalizado sem causa aparente",
+    options: [
+      { label: "Não", score: 0 },
+      { label: "Inchaço leve no fim do dia", score: 1 },
+      { label: "Inchaço rápido e doloroso", score: 3 },
+    ],
+  },
 ]
 
 function TriageScreen({ onBack }: { onBack: () => void }) {
   const [step, setStep] = useState(0)
-  const [answers, setAnswers] = useState<("yes" | "no")[]>([])
+  const [scores, setScores] = useState<number[]>([])
 
-  const handleAnswer = (value: "yes" | "no") => {
-    setAnswers([...answers, value])
+  const handleSelectOption = (score: number) => {
+    setScores([...scores, score])
     setStep(step + 1)
   }
 
   const restart = () => {
     setStep(0)
-    setAnswers([])
+    setScores([])
   }
 
-  const questionStep = step >= 1 && step <= triageSteps.length
-  const isDone = step > triageSteps.length
-  const recommendation = isDone ? (answers[0] === "yes" || answers[2] === "yes" ? "ubs_urgent" : "ubs") : null
-  const currentQuestion = questionStep ? triageSteps[step - 1] : null
+  const questionStep = step >= 1 && step <= triageQuestions.length
+  const isDone = step > triageQuestions.length
+  
+  const totalScore = scores.reduce((a, b) => a + b, 0)
+  const currentQuestion = questionStep ? triageQuestions[step - 1] : null
 
   return (
     <div className="flex flex-col h-full bg-slate-50">
       <div className="bg-blue-600 px-5 pt-5 pb-5 text-white shadow-md">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-1">
           <button onClick={onBack} className="w-9 h-9 rounded-xl bg-white/20 hover:bg-white/30 flex items-center justify-center">
             <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><polyline points="15 18 9 12 15 6" /></svg>
           </button>
           <div>
-            <h3 className="text-white text-base font-bold">Triagem Rápida</h3>
-            <p className="text-blue-200 text-xs">Orientação médica segura</p>
+            <h3 className="text-white text-base font-bold">Triagem Avançada</h3>
+            <p className="text-blue-200 text-xs">16 perguntas por categoria clínica</p>
           </div>
         </div>
       </div>
@@ -490,12 +677,14 @@ function TriageScreen({ onBack }: { onBack: () => void }) {
       <div className="flex-1 overflow-y-auto px-5 py-6">
         {step === 0 && (
           <div className="flex flex-col h-full justify-between">
-            <div className="space-y-5 text-center pt-4">
+            <div className="space-y-4 text-center pt-2">
               <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center">
                 <IconActivity className="w-8 h-8" />
               </div>
-              <h2 className="text-slate-900 text-lg font-bold">Como você está se sentindo?</h2>
-              <p className="text-slate-500 text-xs leading-relaxed">Responda a perguntas rápidas para receber orientações adequadas em Carapicuíba.</p>
+              <h2 className="text-slate-900 text-lg font-bold">Questionário de Saúde</h2>
+              <p className="text-slate-500 text-xs leading-relaxed">
+                Responda às 16 perguntas divididas em categorias médicas para avaliarmos o nível de urgência do seu atendimento em Carapicuíba.
+              </p>
             </div>
             <button onClick={() => setStep(1)} className="w-full bg-blue-600 text-white rounded-2xl py-3.5 text-sm font-bold shadow-md flex items-center justify-center gap-2">
               Iniciar Triagem <IconChevronRight className="w-4 h-4" />
@@ -505,41 +694,64 @@ function TriageScreen({ onBack }: { onBack: () => void }) {
 
         {questionStep && currentQuestion && (
           <div className="flex flex-col h-full justify-between">
-            <div className="space-y-6 pt-4">
-              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-                <span className="text-xs font-bold text-blue-600 uppercase">Questão {step}</span>
-                <h3 className="text-slate-900 text-base font-bold mt-1.5">{currentQuestion.question}</h3>
-                <p className="text-slate-400 text-xs mt-2">{currentQuestion.hint}</p>
+            <div className="space-y-4 pt-1">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-400 px-1">
+                <span className="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full">{currentQuestion.genre}</span>
+                <span>Pergunta {step} de {triageQuestions.length}</span>
               </div>
-              <div className="space-y-3">
-                <button onClick={() => handleAnswer("yes")} className="w-full bg-white hover:bg-blue-50 border border-slate-200 rounded-2xl py-4 px-5 flex items-center justify-between font-bold text-slate-800">
-                  Sim
-                </button>
-                <button onClick={() => handleAnswer("no")} className="w-full bg-white hover:bg-blue-50 border border-slate-200 rounded-2xl py-4 px-5 flex items-center justify-between font-bold text-slate-800">
-                  Não
-                </button>
+              
+              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2">
+                <h3 className="text-slate-900 text-base font-bold leading-snug">{currentQuestion.question}</h3>
+                <p className="text-slate-400 text-xs">{currentQuestion.hint}</p>
+              </div>
+
+              <div className="space-y-2.5 pt-1">
+                {currentQuestion.options.map((opt, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSelectOption(opt.score)}
+                    className="w-full bg-white hover:bg-blue-50 hover:border-blue-300 border border-slate-200 rounded-2xl py-3.5 px-4 text-left font-semibold text-xs text-slate-800 transition-all flex items-center justify-between shadow-sm"
+                  >
+                    <span>{opt.label}</span>
+                    <IconChevronRight className="w-4 h-4 text-slate-400" />
+                  </button>
+                ))}
               </div>
             </div>
           </div>
         )}
 
-        {isDone && recommendation && (
+        {isDone && (
           <div className="flex flex-col h-full justify-between text-center pt-2">
             <div className="space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 mx-auto flex items-center justify-center">
+              <div className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center ${totalScore >= 8 ? "bg-rose-50 text-rose-600" : totalScore >= 4 ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"}`}>
                 <IconActivity className="w-8 h-8" />
               </div>
-              <h2 className="text-slate-900 text-lg font-bold">Recomendação Final</h2>
-              <p className="text-slate-500 text-xs">
-                {recommendation === "ubs_urgent" ? "Dirija-se a um Pronto Atendimento ou Hospital imediatamente." : "Procure a unidade de saúde mais próxima para atendimento regular."}
-              </p>
+              <h2 className="text-slate-900 text-lg font-bold">Resultado da Triagem</h2>
+              
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-left space-y-1">
+                <p className="text-[11px] font-bold uppercase text-slate-400">Classificação de Risco</p>
+                <p className="text-sm font-bold text-slate-800">
+                  {totalScore >= 8 ? "🔴 Risco Alto / Urgência Imediata" : totalScore >= 4 ? "🟡 Atenção / Procurar Atendimento" : "🟢 Fluxo Regular / Quadro Leve"}
+                </p>
+                <p className="text-xs text-slate-500 pt-1">
+                  {totalScore >= 8 
+                    ? "Com base nas suas respostas, recomendamos dirigir-se imediatamente ao Hospital Geral de Carapicuíba ou UPA Bruno Covas."
+                    : totalScore >= 4
+                    ? "Seus sintomas merecem acompanhamento em uma Unidade de Pronto Atendimento (UPA) nas próximas horas."
+                    : "Seus sintomas aparentam estabilidade. Você pode monitorar em casa ou procurar uma UBS para orientações."}
+                </p>
+              </div>
             </div>
-            <button onClick={restart} className="text-slate-400 text-xs font-semibold hover:underline">
-              Refazer triagem
-            </button>
-            <button onClick={onBack} className="w-full bg-blue-600 text-white rounded-2xl py-3.5 text-sm font-bold shadow-md">
-              Voltar ao Mapa
-            </button>
+
+            <div className="space-y-2 pt-4">
+              <button onClick={restart} className="text-slate-500 text-xs font-semibold hover:underline block w-full py-1">
+                Refazer triagem
+              </button>
+              <button onClick={onBack} className="w-full bg-blue-600 text-white rounded-2xl py-3.5 text-sm font-bold shadow-md">
+                Voltar ao Mapa
+              </button>
+            </div>
           </div>
         )}
       </div>
